@@ -19,13 +19,6 @@ import java.util.zip.ZipFile;
  */
 public class ApkWithIconUtil {
 
-    /**
-     * 从指定的apk文件里获取指定file的流
-     *
-     * @param apkpath
-     * @param fileName
-     * @return
-     */
     private static InputStream extractFileFromApk(String apkpath, String fileName) {
         try {
             ZipFile zFile = new ZipFile(apkpath);
@@ -44,14 +37,21 @@ public class ApkWithIconUtil {
         return null;
     }
 
-    public static void parseApk(String apkpath, String outputPath) {
+    /**
+     * Android 获取指定apk信息,并保存图标到到指定目录
+     *
+     * @param apkpath
+     * @param outputPath
+     * @return
+     */
+    public static ApkInfo getApkInfoAndroid(String apkpath, String outputPath) {
         String icon320 = "";
         InputStream is = null;
         BufferedOutputStream bos = null;
         BufferedInputStream bis = null;
+        ApkInfo apkInfo = null;
         try {
-            ApkInfo apkInfo = ApkUtil.getInstance().getApkInfo(apkpath);
-            System.out.println(apkInfo);
+            apkInfo = ApkUtil.getInstance().getApkInfo(apkpath);
             Map<String, String> applicationIcons = apkInfo.getApplicationIcons();
             if (applicationIcons != null) {
                 icon320 = applicationIcons.get(ApkInfo.APPLICATION_ICON_320);
@@ -90,7 +90,28 @@ public class ApkWithIconUtil {
                 }
             }
         }
+        return apkInfo;
+    }
+    //********************************* iOS **************************************
 
+    public static ApkInfo getApkInfoIos(String apkUrl, String outputPath) {
+        ApkInfo apkInfo = null;
+        String iOSIcon = "";
+        try {
+            apkInfo = ApkUtil.getInstance().getIOSInfo(apkUrl);
+            //下载图片
+            if (apkInfo != null) {
+                Map<String, String> applicationIcons = apkInfo.getApplicationIcons();
+                if (applicationIcons != null) {
+                    iOSIcon = applicationIcons.get(ApkInfo.APPLICATION_ICON_320);
+                }
+                HttpHelper.download(iOSIcon, outputPath);
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return apkInfo;
     }
 
     /**
@@ -100,8 +121,14 @@ public class ApkWithIconUtil {
      */
     public static void main(String[] args) {
         String apkpath = "/Users/zhangyakun/Desktop/iBiliPlayer-bili.apk";
-        String outputpath = "/Users/zhangyakun/Desktop/icon.png";
-        parseApk(apkpath, outputpath);
+        String outputpath = "/Users/zhangyakun/Desktop/AndroidIcon.png";
+        String iosUrl = "https://itunes.apple.com/lookup?id=414478124";
+        String iosOutputpath = "/Users/zhangyakun/Desktop/iOSIcon.png";
+        ApkInfo androidApkInfo = getApkInfoAndroid(apkpath, outputpath);
+        ApkInfo iOSApkInfo = getApkInfoIos(iosUrl, iosOutputpath);
+        System.out.println(androidApkInfo);
+        System.out.println(iOSApkInfo);
+
     }
 
 }

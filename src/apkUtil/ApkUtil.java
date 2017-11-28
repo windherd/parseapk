@@ -1,10 +1,15 @@
 package apkUtil;
 
+import org.json.JSONArray;
+import org.json.JSONObject;
+
 import java.io.BufferedReader;
 import java.io.Closeable;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * apk工具类。封装了获取Apk信息的方法。
@@ -166,16 +171,6 @@ public class ApkUtil {
         }
     }
 
-    public static void main(String[] args) {
-        try {
-            String demo = "/Users/zhangyakun/Desktop/iBiliPlayer-bili.apk";
-            ApkInfo apkInfo = ApkUtil.getInstance().getApkInfo(demo);
-            System.out.println(apkInfo);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
     public String getmAaptPath() {
         return mAaptPath;
     }
@@ -183,4 +178,55 @@ public class ApkUtil {
     public void setmAaptPath(String mAaptPath) {
         this.mAaptPath = mAaptPath;
     }
+
+    //********************************* iOS **************************************
+
+    /**
+     * @param url 应用itunes地址
+     * @return
+     */
+    public ApkInfo getIOSInfo(String url) throws Exception {
+        String id = "";
+        String regex = "\\d+";
+        Pattern p = Pattern.compile(regex);
+        Matcher matcher = p.matcher(url);
+        if (matcher.find()) {
+            id = matcher.group();
+        } else {
+            return null;
+        }
+        String s = HttpHelper.sendGet("https://itunes.apple.com/lookup", "id=" + id);
+        JSONObject jsonObject = null;
+        ApkInfo apkInfo = new ApkInfo();
+        try {
+            jsonObject = new JSONObject(s);
+            JSONArray results = jsonObject.getJSONArray("results");
+            JSONObject jsonObject1 = results.getJSONObject(0);
+            String bundleId = jsonObject1.getString("bundleId");
+            String trackName = jsonObject1.getString("trackName");
+            String version = jsonObject1.getString("version");
+            String icon = jsonObject1.getString("artworkUrl512");
+            apkInfo.setPackageName(bundleId);
+            apkInfo.setApplicationLable(trackName);
+            apkInfo.setVersionName(version);
+            apkInfo.addToApplicationIcons(ApkInfo.APPLICATION_ICON_320, icon);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return apkInfo;
+    }
+
+    public static void main(String[] args) {
+        try {
+            String demo = "/Users/zhangyakun/Desktop/iBiliPlayer-bili.apk";
+            ApkInfo apkInfo = ApkUtil.getInstance().getApkInfo(demo);
+            System.out.println(apkInfo);
+            String url = "https://itunes.apple.com/lookup?id=414478124";
+            ApkInfo iOSInfo = ApkUtil.getInstance().getIOSInfo(url);
+            System.out.println(iOSInfo);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
 }
