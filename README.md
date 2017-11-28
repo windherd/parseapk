@@ -13,4 +13,8 @@ ApkInfo apkInfo=ApkWithIconUtil.getApkInfoAndroid(apkpath,iconoutputpath)
    * iOS    
 ApkInfo apkInfo=ApkWithIconUtil.getApkInfoIos(iOSUrl,iconoutputpath)
 
+![](https://ws2.sinaimg.cn/large/006tNc79gy1flxo6qtsioj30qv0c876p.jpg)
+
+![](https://ws4.sinaimg.cn/large/006tNc79gy1flxo6u4kx0j30f606o0tf.jpg)
+
 cool~
